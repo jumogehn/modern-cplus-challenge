@@ -8,7 +8,7 @@
 #include <thread>
 #include <assert.h>
 
-template <typename T, typename F>
+   template <typename T, typename F>
 std::vector<T> alter(std::vector<T> data, F&& f)
 {
    std::transform(
@@ -18,7 +18,7 @@ std::vector<T> alter(std::vector<T> data, F&& f)
    return data;
 }
 
-template <typename T, typename F>
+   template <typename T, typename F>
 std::vector<T> palter(std::vector<T> data, F&& f)
 {
    if (data.size() <= 10000)
@@ -37,12 +37,12 @@ std::vector<T> palter(std::vector<T> data, F&& f)
       for (int i = 0; i < thread_count; ++i)
       {
          first = last;
-         last = i == thread_count - 1 ? std::end(data) : first + size;
+         last = ((i == (thread_count - 1)) ? std::end(data) : (first + size));
 
          threads.emplace_back([first, last, &f]() {
-            std::transform(first, last, first,
-               std::forward<F>(f));
-         });
+                              std::transform(first, last, first,
+                                             std::forward<F>(f));
+                              });
       }
 
       for (int i = 0; i < thread_count; ++i)
@@ -52,7 +52,7 @@ std::vector<T> palter(std::vector<T> data, F&& f)
    return data;
 }
 
-template <typename RandomAccessIterator, typename F>
+   template <typename RandomAccessIterator, typename F>
 void ptransform(RandomAccessIterator begin, RandomAccessIterator end, F&& f)
 {
    auto size = std::distance(begin, end);
@@ -74,15 +74,15 @@ void ptransform(RandomAccessIterator begin, RandomAccessIterator end, F&& f)
          else std::advance(last, size);
 
          threads.emplace_back([first, last, &f]() {
-            std::transform(first, last, first, std::forward<F>(f));
-         });
+                              std::transform(first, last, first, std::forward<F>(f));
+                              });
       }
 
       for (auto & t : threads) t.join();
    }
 }
 
-template <typename T, typename F>
+   template <typename T, typename F>
 std::vector<T> palter2(std::vector<T> data, F&& f)
 {
    ptransform(
@@ -96,7 +96,7 @@ int main()
 {
    const size_t count = 10000000;
    std::vector<int> data(count);
-   
+
    std::random_device rd;
    std::mt19937 mt;
    auto seed_data = std::array<int, std::mt19937::state_size> {};
@@ -106,13 +106,13 @@ int main()
    std::uniform_int_distribution<> ud(1, 100);
 
    std::generate_n(std::begin(data), count, [&mt, &ud]() {return ud(mt); });
-   
+
    auto start = std::chrono::system_clock::now();
    auto r1 = alter(data, [](int const e) {return e * e; });
    auto end = std::chrono::system_clock::now();
    auto t1 = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
    std::cout << "time: " << t1.count() << "ms" << std::endl;
-   
+
    start = std::chrono::system_clock::now();
    auto r2 = palter(data, [](int const e) {return e * e; });
    end = std::chrono::system_clock::now();
